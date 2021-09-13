@@ -1,6 +1,7 @@
 import scrapy
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
+from scrapy.selector import Selector
 
 
 class NoticesSpider(CrawlSpider):
@@ -42,4 +43,21 @@ class NoticesSpider(CrawlSpider):
         print("*\nfound contract: ", response.url)
         return item
 
-#
+# notice tab 1 (introduction) table rows
+xpath_select_intro_table_rows = "//div[@class='rmpView MultiPage']//tr"
+# header key, value
+# /th[1] : /th[2] 
+# other key, value
+# /td[1] : /td[2]
+
+# export to HTML selector
+xpath_select_html_download = (
+    "//a[@id='ctl00_ContentPlaceHolder1_tab_StandardNoticeView1_"
+    "notice_introduction1_cmdExportHTML']"
+)
+# 
+
+# convert html text to selector object
+# from scrapy.Selector import selector
+# s = Selector(text=r2text)
+# //h2[5]
