@@ -1,0 +1,52 @@
+# use docker_compose format version 3.x
+version: "3"
+services:
+  # splash server for webscraping dynamically rendered content
+  splash:
+    # circumstances under which to restart container
+    restart: "no" # Options: on-failure, unless-stopped, always
+    image: scrapinghub/splash
+    container_name: splash_container
+    #command: tail -f /dev/null
+    ports:
+      # splash service
+      - "8050:8050"
+  # postgres database
+  postgres:
+    container_name: postgres_container
+    image: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      PGDATA: /data/postgres
+    volumes:
+       - postgres:/data/postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - postgres
+    restart: unless-stopped
+  
+  # To add the above postgres server to pgadmin, use hostname as defined by docker: 'postgres'
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+       - pgadmin:/var/lib/pgadmin
+
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    networks:
+      - postgres
+    restart: unless-stopped
+
+networks:
+  postgres:
+    driver: bridge
+
+volumes:
+  postgres:
+  pgadmin:
