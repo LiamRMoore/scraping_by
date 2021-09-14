@@ -4,7 +4,7 @@ Web scraper application for identifying public sector contracts.
 
 Currently implemented:
     
-    - (Public Contracts Scotland)[https://www.publiccontractsscotland.gov.uk/] **under construction**
+    - [Public Contracts Scotland][1] **under construction**
 
 ## Install
 
@@ -63,3 +63,5 @@ This Compose file contains the following environment variables:
 * **Password** as `POSTGRES_PASSWORD`, by default `changeme`
 
 
+
+[1]: https://www.publiccontractsscotland.gov.uk/
