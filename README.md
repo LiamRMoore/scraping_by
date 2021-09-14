@@ -4,8 +4,8 @@ Web scraper application for identifying public sector contracts.
 
 Currently implemented:
     
-    - [Public Contracts Scotland](https://www.publiccontractsscotland.gov.uk/) **under construction**
-    
+    - (Public Contracts Scotland)[https://www.publiccontractsscotland.gov.uk/] **under construction**
+
 ## Install
 
 Install the python environment for the webscraper:
