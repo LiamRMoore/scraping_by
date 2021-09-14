@@ -4,7 +4,7 @@ Web scraper application for identifying public sector contracts.
 
 Currently implemented:
     
-    - [Public Contracts Scotland][1] **under construction**
+- [Public Contracts Scotland][1] (**under construction**)
 
 ## Install
 
