@@ -1,32 +1,28 @@
 import os
-import scrapy
-
-import gim_cv.config as cfg
 
 from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
-from twisted.internet import reactor
-from scrapy.crawler import CrawlerRunner
 from scrapy.utils.log import configure_logging
 
 import logging
 
-
+configure_logging()
 log = logging.getLogger(__name__)
 
 # test this - original commented out
-#configure_logging({'LOG_FORMAT': '%(levelname)s: %(message)s'})
+# configure_logging({'LOG_FORMAT': '%(levelname)s: %(message)s'})
 
-settings_file_path = 'scraping_by.scrapers.pcs.settings'
-os.environ['SCRAPY_SETTINGS_MODULE'] = settings_file_path
+settings_file_path = "scraping_by.scrapers.pcs.settings"
+os.environ["SCRAPY_SETTINGS_MODULE"] = settings_file_path
 
 scrapy_settings = get_project_settings()
 
 
 def scrape_pcs_notices(settings=scrapy_settings):
     crawler_process = CrawlerProcess(settings)
-    crawler_process.crawl('notices')
-    crawler_process.start() # the script will block here until the crawling is finished
+    crawler_process.crawl("notices")
+    crawler_process.start()  # the script will block here until the crawling is finished
+
 
 """
 class Scraper:
