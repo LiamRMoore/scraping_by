@@ -48,6 +48,10 @@ This Compose file contains the following environment variables:
 * **Username:** pgadmin4@pgadmin.org (as a default)
 * **Password:** admin (as a default)
 
+## Access to Splash:
+
+* **URL:** `http:localhost:8050`
+
 ## Add a new server in PgAdmin:
 * **Host name/address** `postgres`
 * **Port** `5432`
