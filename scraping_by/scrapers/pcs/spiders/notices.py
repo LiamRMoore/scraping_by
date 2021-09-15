@@ -1,140 +1,128 @@
 import scrapy
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
 
 # from scrapy.selector import Selector
-# from scrapy_splash import SplashRequest
+from scrapy_splash import SplashRequest
 
 from scraping_by.scrapers.pcs.items import PcsItem
 
+
+USER_AGENT = (
+    "Mozilla/5.0 (X11; Linux x86_64; rv:90.0) Gecko/20100101 Firefox/90.0"
+)
 p = PcsItem()
-# lua script for splash to get list of links
-# show_ortho_links_lua = """
-# function main(splash, args)
-#   splash.private_mode_enabled = false
-#   splash:set_user_agent("{user_agent}")
-#   url = args.url
-#   assert(splash:go(url))
-#   assert(splash:wait(1))
-#   download_button = assert(splash:select(
-#   	"{sel_download_button_css}"
-#   ))
-#   download_button:mouse_click()
-#   assert(splash:wait(1))
-#   -- click all folders
-#   local elems = splash:select_all("{sel_folder_css}")
-#   for i, elem in ipairs(elems) do
-#     elem:mouse_click()
-#     splash:wait(0.5)
-#   end
-#   splash:set_viewport_full()
-#   return splash:html()
-# end
-# """
 
 
-class NoticesSpider(CrawlSpider):
+class NoticesSpider(scrapy.Spider):
     name = "notices"
     allowed_domains = [
-        "www.publiccontractsscotland.gov.uk/",
+        "www.publiccontractsscotland.gov.uk",
         "publiccontractsscotland.gov.uk",
     ]
-    start_urls = [
+    base_url = allowed_domains[0]
+    starting_url = (
         "https://www.publiccontractsscotland.gov.uk/Search/Search_MainPage.aspx"
-    ]
-    user_agent = (
-        "Mozilla/5.0 (X11; Linux x86_64; rv:90.0) Gecko/20100101 Firefox/90.0"
     )
+    user_agent = USER_AGENT  # (
+    # "Mozilla/5.0 (X11; Linux x86_64; rv:90.0) Gecko/20100101 Firefox/90.0"
+    # )
 
-    # "//tr[@class='pcs-tbl-row']"
-    rules = (
-        Rule(
-            LinkExtractor(
-                restrict_xpaths=["//a[@class='ns-list-link pcs-focus']"]
-            ),
-            callback="parse_item",
-            follow=True,
-            process_request="set_user_agent",
-        ),
-    )
-
-    def set_user_agent(self, request, spider):
-        request.headers["User-Agent"] = self.user_agent
-        return request
+    wait_load: float = 0.5
+    wait_next_page: float = 2.5
+    contract_link_xpath = "//a[@class='ns-list-link pcs-focus']"
 
     def start_requests(self):
-        yield scrapy.Request(
-            url="https://www.publiccontractsscotland.gov.uk/Search/Search_MainPage.aspx",
+        yield SplashRequest(
+            url=self.starting_url,
+            callback=self.parse,  # method to interpret html response
             headers={"User-Agent": self.user_agent},
         )
 
-    def parse_item(self, response):
-        item = {}
-        item["user-agent"] = response.request.headers["User-Agent"]
-        # item['domain_id'] = response.xpath('//input[@id="sid"]/@value').get()
-        # item['name'] = response.xpath('//div[@id="name"]').get()
-        # item['description'] = response.xpath('//div[@id="description"]').get()
-        print("*\nfound contract: ", response.url)
-        return item
+    def parse(self, response):
+        """
+        N.B. - recursive
+        """
+        print("** top level parse **")
+        for ix, link in enumerate(response.xpath(self.contract_link_xpath)):
+            title = link.xpath("./text()").get()
+            rel_link = link.xpath("./@href").get()
+            full_link = self.base_url + rel_link
+            print("found project:", title, "\n->", full_link)
+        else:
+            print("on to next page...")
+            print(response.url)
+            print(type(response), dir(response))
+            # print(self.next_page_lua)
+            yield SplashRequest(
+                url=response.url,
+                callback=self.parse,  # recursive
+                endpoint="execute",  # run a lua script
+                args=dict(
+                    lua_source=self.next_page_lua
+                ),  # source for script to run,
+                dont_filter=False,
+                # cookies=response.cookies
+            )
 
-    def expand_folders(self, response):
-        """parse the html of the individual ortho pages"""
-        # grab the title (name of dataset e.g. Ortho Vlaanderen 2012...)
-        title = response.xpath(
-            '//section[@class="region"]/div/div/div/h1/text()'
-        ).get()
-        print(title)
-        # parse it to resolve individual fields
-        # title_meta = parse_title(title, meta_keys=self.title_meta_keys)
-        # submit splash JS req to expand downloadable folders and extract html
-        # feed this to extract_orthos, passing the dataset title
-        # yield SplashRequest(
-        #     url=response.url,
-        #     callback=self.extract_orthos,
-        #     endpoint="execute",
-        #     args={
-        #         "lua_source": show_ortho_links_lua.format(
-        #             user_agent=self.user_agent,
-        #             sel_download_button_css=sel_download_button_css,
-        #             sel_folder_css=sel_folder_css,
-        #         ),
-        #         "wait": 2,
-        #     },
-        #     meta=title_meta,
-        # )
+    @property
+    def next_page_lua(self):
+        s = (
+            """
+            function main(splash, args)
+                splash:init_cookies(splash.args.cookies)
+                splash:set_user_agent("{user_agent}")
+                splash.private_mode_enabled = true
+                url = args.url
+                assert(
+                    splash:go{{
+                        url,
+                        headers=splash.args.headers,
+                        http_method=splash.args.http_method,
+                        body=splash.args.body
+                    }}
+                )
+                assert(splash:wait({wait_load}))
+                --
+                --
+                next_page_btn = assert(
+                    splash:select(
+                        "#ctl00_maincontent_PagingHelperTop_btnNext"
+                    )
+                )
+                assert(next_page_btn:mouse_click())
+                assert(splash:wait({wait_next_page}))
 
-    # def extract_orthos(self, response):
-    #     # find all file classes in expanded download folders
-    #     sel_file_links = response.xpath('//span[@class="file"]')
-    #     # loop over selectorlist, getting ortho links, names and filesizes
-    #     for file in sel_file_links:
-    #         item = VLOrthoItem()
-    #         loader = ItemLoader(item=item, selector=file)
-    #         loader.add_value("page_url", response.url)
-    #         loader.add_xpath("suffix", ".//a/text()")
-    #         loader.add_xpath("filesize", ".//child::node()[2]")
-    #         loader.add_xpath("filename", ".//a/text()")
-    #         loader.add_xpath("download_url", ".//a/@href")
-    #         # tag on the metadata associated with the whole dataset: year etc
-    #         loader.add_value("dataset", response.request.meta.get("dataset"))
-    #         for k in self.title_meta_keys:
-    #             if k in response.request.meta and k in item.fields.keys():
-    #                 loader.add_value(k, response.request.meta[k])
-    #         yield loader.load_item()
+                local entries = splash:history()
+                local last_response = entries[#entries].response
+
+                return {{
+                    url = splash:url(),
+                    html = splash:html(),
+                    headers = last_response.headers,
+                    cookies = splash:get_cookies(),
+                    http_status = last_response.status
+                }}
+            end
+            """
+        ).format(
+            user_agent=self.user_agent,
+            wait_load=self.wait_load,
+            wait_next_page=self.wait_next_page,
+        )
+        return s
 
 
-# notice tab 1 (introduction) table rows
-xpath_select_intro_table_rows = "//div[@class='rmpView MultiPage']//tr"
-# header key, value
-# /th[1] : /th[2]
-# other key, value
-# /td[1] : /td[2]
+# # notice tab 1 (introduction) table rows
+# xpath_select_intro_table_rows = "//div[@class='rmpView MultiPage']//tr"
+# # header key, value
+# # /th[1] : /th[2]
+# # other key, value
+# # /td[1] : /td[2]
 
-# export to HTML selector
-xpath_select_html_download = (
-    "//a[@id='ctl00_ContentPlaceHolder1_tab_StandardNoticeView1_"
-    "notice_introduction1_cmdExportHTML']"
-)
+# # export to HTML selector
+# xpath_select_html_download = (
+#     "//a[@id='ctl00_ContentPlaceHolder1_tab_StandardNoticeView1_"
+#     "notice_introduction1_cmdExportHTML']"
+# )
 #
 
 # convert html text to selector object
