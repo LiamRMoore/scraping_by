@@ -8,6 +8,13 @@ Currently implemented:
 
 ## Install
 
+Install the docker container running a Splash server (for scraping
+dynamic webpages), and pSQL + pgAdmin (for storing scraped data).
+
+```bash
+docker-compose up -d
+```
+
 Install the python environment for the webscraper:
 
 ```bash
@@ -18,13 +25,6 @@ Activate the environment:
 
 ```
 conda activate scraping_by
-```
-
-Install the docker container running a Splash server (for scraping
-dynamic webpages), and pSQL + pgAdmin (for storing scraped data).
-
-```bash
-docker-compose up -d
 ```
 
 ## Run webscraper
