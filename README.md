@@ -30,6 +30,7 @@ conda activate scraping_by
 ## Run webscraper
 
 ```bash
+cd scraping_by/scrapers
 scrapy crawl notices
 ```
 
