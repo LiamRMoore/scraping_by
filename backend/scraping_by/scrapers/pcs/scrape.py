@@ -6,6 +6,7 @@ See: https://api.publiccontractsscotland.gov.uk/v1/Notices
 """
 import argparse
 import asyncio
+from typing import Optional
 
 import httpx
 from ocdskit.combine import merge
@@ -67,23 +68,20 @@ async def query_api(client, params: dict):
     return response
 
 
-async def get_notices(params: dict):
+async def get_notices(
+    output_type: Optional[int] = 0, notice_type: Optional[int] = 2
+):
     async with httpx.AsyncClient() as client:
-        response = await query_api(client, params)
+        response = await query_api(
+            client,
+            params={"outputType": output_type, "noticeType": notice_type},
+        )
     data = response.json()
     # RAM non-issue here; evaluate generator for all releases
     data["releases"] = list(merge(data["releases"]))
     # deserialise JSON
     data = Model(**data)
     return data
-
-
-# top level
-# release["id"]: "rls-1-SEP427811"
-# release["ocid"]: "ocds-r6ebe6-0000667263"
-# release["date"]: "2021-09-17T00:00:00Z"
-# release["initiationType"]: "tender"
-# release["parties"] = [{party1, party2}]
 
 
 if __name__ == "__main__":
@@ -95,6 +93,6 @@ if __name__ == "__main__":
     )
 
     # obtain releases from API
-    data = asyncio.run(get_notices(params))
+    data = asyncio.run(get_notices(**params))
     print(f"Found {len(data.releases)} records")
     print(data)
