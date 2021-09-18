@@ -28,20 +28,38 @@ parser.add_argument(
     "--output-type",
     dest="output_type",
     type=int,
-    default=1,
+    default=0,
     help="0: OCDS, 1: TED/custom",
 )
 
 
-async def query_api(client, params):
+async def query_api(client, params: dict):
     response = await client.get(API_URL, params=params)
     return response
 
 
-async def main(params):
+async def main(params: dict):
     async with httpx.AsyncClient() as client:
         response = await query_api(client, params)
     return response.json()
+
+
+def same_structure(n1: dict, n2: dict) -> bool:
+    """
+    recursive structure checker for two nested jsons
+
+    returns True if all keys are the same at every level of nesting,
+    False otherwise
+    """
+    for (k1, v1), (k2, v2) in zip(n1.items(), n2.items()):
+        if not (k1 == k2):
+            return False
+        if isinstance(v1, dict):
+            if isinstance(v2, dict):
+                return same_structure(v1, v2)
+            else:
+                raise ValueError("structures different for:", k1, ",", k2)
+    return True
 
 
 if __name__ == "__main__":
@@ -53,24 +71,10 @@ if __name__ == "__main__":
         outputType=args.output_type,  # 0: OCDS, 1: TED/custom
     )
     results = asyncio.run(main(params))
-    print(results.keys())
-    notices = results["notices"]
+    notices = results["releases"]
 
     print(f"Found {len(notices)} records")
-    # sys.exit(0)
-    for n in notices:
 
-        print(n)
-        # TODO: look into best json parser for using native python getattr object notation
-        # Short description
-        descr = n["Form_Section"]["F03_2014"]["Object_Contract"]
-        # print("Short description:")
-        # print(descr)
-
-        # URLs for more details @
-        url = n["Form_Section"]["F03_2014"]["Contracting_Body"][
-            "Address_Contracting_Body"
-        ]["URL_Buyer"]
-        print("URL:")
-        print(url)
-        break
+    # check all records have exactly the same structure
+    for n1, n2 in zip(notices, notices[1:]):
+        print(n1["id"], "&", n2["id"], ":", same_structure(n1, n2))
