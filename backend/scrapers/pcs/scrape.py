@@ -10,7 +10,7 @@ import asyncio
 import httpx
 from ocdskit.combine import merge
 
-from scrapers.pcs.model import Model
+from scrapers.pcs.response_model import Model
 
 
 # curl --location --request GET 'https://api.publiccontractsscotland.gov.uk/v1/Notices?noticeType=2&outputType=0' > release_packages.json
