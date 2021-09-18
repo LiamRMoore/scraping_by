@@ -20,9 +20,9 @@ class Contract(BaseModel):
     buyer: str
     n_lots: int
     lots_description: str
-    first_lot_duration_days: int
-    tender_end_date: str
-    award_start_date: str
+    first_lot_duration_days: Optional[int] = None
+    tender_end_date: Optional[str] = None
+    award_start_date: Optional[str] = None
     value: Optional[float] = None
 
 
