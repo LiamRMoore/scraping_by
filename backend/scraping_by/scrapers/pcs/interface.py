@@ -1,7 +1,7 @@
 """
 Implements an
 """
-from scrapers.contract import ContractInterface
+from scraping_by.scrapers.contract import ContractInterface
 
 
 class PCSRelease(ContractInterface):

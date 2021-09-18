@@ -1,6 +1,6 @@
 import logging
 
-from .interface import PCSRelease
+from scraping_by.scrapers.pcs.interface import PCSRelease
 
 log = logging.getLogger(__name__)
 
