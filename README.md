@@ -27,13 +27,6 @@ Activate the environment:
 conda activate scraping_by
 ```
 
-## Run webscraper
-
-```bash
-cd scraping_by/scrapers
-scrapy crawl notices
-```
-
 ### docker-compose details
 This Compose file contains the following environment variables:
 

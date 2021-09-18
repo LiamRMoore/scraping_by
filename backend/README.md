@@ -1,4 +1,12 @@
 
+# Run webscraper
+
+```bash
+python scrapers/pcs/api.py
+```
+
+# How the data model/schema was generated
+
 Get a sample of the JSON output from the API (contract notices, in OCDS format):
 
 ```bash
