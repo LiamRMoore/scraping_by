@@ -67,7 +67,7 @@ async def query_api(client, params: dict):
     return response
 
 
-async def main(params: dict):
+async def get_notices(params: dict):
     async with httpx.AsyncClient() as client:
         response = await query_api(client, params)
     data = response.json()
@@ -95,6 +95,6 @@ if __name__ == "__main__":
     )
 
     # obtain releases from API
-    data = asyncio.run(main(params))
+    data = asyncio.run(get_notices(params))
     print(f"Found {len(data.releases)} records")
     print(data)
