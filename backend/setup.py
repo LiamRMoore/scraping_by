@@ -11,5 +11,5 @@ setup(
     description="Web scraping utilities for identifying contracts",
     author="Liam R. Moore",
     packages=find_packages(exclude=["data", "figures", "output", "notebooks"]),
-    long_description=read("README.md"),
+    long_description="TODO",  # read("README.md"),
 )
