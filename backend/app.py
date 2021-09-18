@@ -9,10 +9,10 @@ app = FastAPI()
 @app.get("/contracts/pcs")
 async def get_contracts(
     output_type: Optional[int] = Query(
-        0, description="An integer specifying the output format"
+        0, description="Integer code specifying the output format."
     ),
     notice_type: Optional[int] = Query(
-        2, description="An integer specifying the notice type"
+        2, description="Integer code specifying the notice type."
     ),
 ) -> List:
     data = await pcs.get_notices(output_type, notice_type)
