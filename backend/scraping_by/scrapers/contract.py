@@ -24,6 +24,7 @@ class Contract(BaseModel):
     tender_end_date: Optional[str] = None
     award_start_date: Optional[str] = None
     value: Optional[float] = None
+    currency: Optional[str] = None
 
 
 class ContractInterface(abc.ABC):

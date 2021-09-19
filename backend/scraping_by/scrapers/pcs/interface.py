@@ -55,4 +55,6 @@ class PCSRelease(ContractInterface):
                 value=self.data.tender.value.amount,
                 currency=self.data.tender.value.currency,
             )
+        else:
+            data.update(currency=None)
         return data
