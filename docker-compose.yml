@@ -43,6 +43,16 @@ services:
       - postgres
     restart: unless-stopped
 
+  serverapp:
+    container_name: scraping-by-server
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    volumes:
+      - './backend:/app'
+    ports:
+      - 80:80
+
   webapp:
     container_name: scraping-by-web-app
     build:

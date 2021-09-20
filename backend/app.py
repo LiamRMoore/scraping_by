@@ -1,10 +1,23 @@
 from fastapi import FastAPI, Query
+
+from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional
 
 import scraping_by.scrapers.pcs as pcs
 
 app = FastAPI()
 
+origins = [
+    "*",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/contracts/pcs")
 async def get_contracts(

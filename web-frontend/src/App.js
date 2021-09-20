@@ -1,5 +1,6 @@
 import './App.css';
 import SearchResults from './search-results';
+import {perform_get} from './api.service'
 
 function App() {
   return (
@@ -7,6 +8,7 @@ function App() {
       <header className="App-header">
         <SearchResults></SearchResults>
       </header>
+      <button onClick={perform_get}>Get Results</button>
     </div>
   );
 }
